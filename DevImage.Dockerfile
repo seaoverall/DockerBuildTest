@@ -199,7 +199,7 @@ RUN apt-get update && \
 
 # build dldt
 ARG DLDT_REPO=https://github.com/openvinotoolkit/openvino.git
-RUN git clone -b 2021.3-doc-update --depth 1 ${DLDT_REPO} /opt/build/openvino && \
+RUN git clone -b 2021.4.1 --depth 1 ${DLDT_REPO} /opt/build/openvino && \
   cd /opt/build/openvino && \
   git submodule update --init --recursive
 
@@ -455,7 +455,7 @@ RUN cd /opt/build && \
       -Dfdkaac=disabled \
     && cd build && \
     ninja install && \
-    DESTDIR=/opt/dist ninja install 
+    DESTDIR=/opt/dist ninja install
 
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -503,7 +503,7 @@ RUN apt-get update && \
 ARG GVA_REPO=https://github.com/openvinotoolkit/dlstreamer_gst.git
 # TODO: This is a workaround for a bug in dlstreamer_gst
 ENV LIBRARY_PATH=/usr/local/lib
-RUN git clone -b v1.4.1 --depth 1 $GVA_REPO /opt/build/gst-video-analytics && \
+RUN git clone -b v1.5.2 --depth 1 $GVA_REPO /opt/build/gst-video-analytics && \
     cd /opt/build/gst-video-analytics && \
     git submodule update --init && \
     sed -i "195s/) {/||g_strrstr(name, \"image\")) {/" gst/elements/gvapython/python_callback.cpp && \
@@ -720,8 +720,8 @@ RUN cd /opt/build && \
     git clone -b master ${OWT_SDK_REPO} && \
     cd owt-client-javascript/scripts && \
     git reset --hard v5.0 && \
-    npm install && grunt 
-    
+    npm install && grunt
+
 # Get quic
 ARG OWT_QUIC_REPO=https://github.com/open-webrtc-toolkit/owt-deps-quic/releases/download/v0.1/dist.tgz
 RUN mkdir -p /opt/build/owt-server/third_party/quic-lib && \
