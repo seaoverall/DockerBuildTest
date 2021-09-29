@@ -33,4 +33,4 @@ jobs:
           file: ./DevImage.Dockerfile
           platforms: linux/amd64
           push: true
-          tags: toco/app:latest
+          tags: toco/owt-gst-build:v2
