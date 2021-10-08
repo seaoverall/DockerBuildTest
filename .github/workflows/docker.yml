@@ -13,6 +13,14 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
       -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            toco/owt-gst-build
+      -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       -
@@ -33,4 +41,4 @@ jobs:
           file: ./DevImage.Dockerfile
           platforms: linux/amd64
           push: true
-          tags: toco/owt-gst-build:v2
+          tags: ${{ steps.meta.outputs.tags }}
