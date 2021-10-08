@@ -449,6 +449,29 @@ RUN apt-get update && \
     git ocl-icd-opencl-dev opencl-headers pkg-config libpython3-dev python-gi-dev ca-certificates libva-dev && \
   rm -rf /var/lib/apt/lists/*
 
+
+# install paho.mqtt lib for dlstreamer_gst
+RUN git clone -b v1.3.8 --depth=1 https://github.com/eclipse/paho.mqtt.c.git /opt/build/paho.mqtt.c && \
+    cd /opt/build/paho.mqtt.c && \
+    cmake -Bbuild -H. -DPAHO_ENABLE_TESTING=OFF -DPAHO_BUILD_STATIC=ON -DPAHO_WITH_SSL=ON -DPAHO_HIGH_PERFORMANCE=ON && \
+    cd build && make -j $(nproc) && \
+    make install DESTDIR=/opt/dist && \
+    make install && ldconfig && \
+    git clone --depth=1 https://github.com/eclipse/paho.mqtt.cpp /opt/build/paho.mqtt.cpp && \
+    cd /opt/build/paho.mqtt.cpp && \
+    cmake -Bbuild -H. -DPAHO_BUILD_STATIC=ON \
+    -DPAHO_BUILD_DOCUMENTATION=OFF  \
+    -DPAHO_BUILD_SAMPLES=OFF && \
+    cd build &&  make -j $(nproc) && \
+    make install DESTDIR=/opt/dist && \
+    make install && ldconfig
+
+#  install kafka lib for dlstreamer_gst \
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    librdkafka-dev uuid-dev && \
+  rm -rf /var/lib/apt/lists/*
+
 # build gst-plugin-gva
 # formerly https://github.com/opencv/gst-video-analytics
 ARG GVA_REPO=https://github.com/openvinotoolkit/dlstreamer_gst.git
@@ -466,18 +489,18 @@ RUN git clone -b v1.5.2 --depth 1 $GVA_REPO /opt/build/gst-video-analytics && \
         -DCMAKE_INSTALL_PREFIX=/usr/local \
         -DCMAKE_BUILD_TYPE=Release \
         -DDISABLE_SAMPLES=ON \
-        -DENABLE_PAHO_INSTALLATION=OFF \
-        -DENABLE_RDKAFKA_INSTALLATION=OFF \
-        -DENABLE_VAAPI=OFF \
+        -DENABLE_PAHO_INSTALLATION=ON \
+        -DENABLE_RDKAFKA_INSTALLATION=ON \
+        -DENABLE_VAAPI=ON \
         -DENABLE_VAS_TRACKER=ON \
-        -DENABLE_AUDIO_INFERENCE_ELEMENTS=OFF \
+        -DENABLE_AUDIO_INFERENCE_ELEMENTS=ON \
         -Dwith_drm=no \
         -Dwith_x11=no \
         -Dwith_glx=no \
         -Dwith_wayland=no \
         -Dwith_egl=no \
-        -DMQTT=0 \
-        -DKAFKA=0 \
+        -DMQTT=1 \
+        -DKAFKA=1 \
         .. \
     && make -j $(nproc) \
     && make install \
@@ -630,6 +653,7 @@ ARG OWT_REPO=https://github.com/open-webrtc-toolkit/owt-server
 RUN cd /opt/build && \
     git clone -b master ${OWT_REPO} && \
     cd owt-server && \
+    git config user.email "you@example.com" && \
     git reset --hard v5.0.1
 
 #Patch OWT for Analytics
