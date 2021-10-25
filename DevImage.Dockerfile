@@ -203,12 +203,6 @@ RUN git clone -b 2021.4.1 --depth 1 ${DLDT_REPO} /opt/build/openvino && \
   cd /opt/build/openvino && \
   git submodule update --init --recursive
 
-# TODO:
-# Perform make install of openvino instead of manually copying build artifacts.
-#
-# For now, only ngraph target is installed using make install (it auto-generates .cmake
-# files during install stage, so they can be later used by other projects).
-
 RUN cd /opt/build/openvino && \
     sed -i s/-Werror//g $(grep -ril Werror inference-engine/thirdparty/) && \
   mkdir build && cd build && \
@@ -488,10 +482,10 @@ RUN git clone -b v1.5.2 --depth 1 $GVA_REPO /opt/build/gst-video-analytics && \
         -DGIT_INFO=git_"$(git rev-parse --short HEAD)" \
         -DCMAKE_INSTALL_PREFIX=/usr/local \
         -DCMAKE_BUILD_TYPE=Release \
-        -DDISABLE_SAMPLES=ON \
+        -DDISABLE_SAMPLES=OFF \
         -DENABLE_PAHO_INSTALLATION=ON \
         -DENABLE_RDKAFKA_INSTALLATION=ON \
-        -DENABLE_VAAPI=ON \
+        -DENABLE_VAAPI=OFF \
         -DENABLE_VAS_TRACKER=ON \
         -DENABLE_AUDIO_INFERENCE_ELEMENTS=ON \
         -Dwith_drm=no \
@@ -653,16 +647,18 @@ ARG OWT_REPO=https://github.com/open-webrtc-toolkit/owt-server
 RUN cd /opt/build && \
     git clone -b master ${OWT_REPO} && \
     cd owt-server && \
-    git config user.email "you@example.com" && \
+    git config user.email "x@y" && \
     git reset --hard v5.0.1
 
 #Patch OWT for Analytics
 
 ARG OWT_ANALYTICS_PATCH=https://raw.githubusercontent.com/OpenVisualCloud/Dockerfiles-Resources/master/0002-fix-the-analytics-restart.patch
+ARG OWT_AVREAD_PATCH=https://raw.githubusercontent.com/OpenVisualCloud/Dockerfiles-Resources/master/0001-Remove-av_read_play-which-already-called-inside-rtsp.patch
 
 RUN cd /opt/build/owt-server && \
     wget ${OWT_ANALYTICS_PATCH} && \
-    git am 0002-fix-the-analytics-restart.patch
+    git am 0002-fix-the-analytics-restart.patch && \
+    git am 0001-Remove-av_read_play-which-already-called-inside-rtsp.patch
 
 
 
